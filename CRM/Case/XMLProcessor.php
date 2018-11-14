@@ -53,10 +53,10 @@ class CRM_Case_XMLProcessor {
    * label_b_a), but CiviCase XML refers to reltypes by a single name.
    * REL_TYPE_CNAME identifies the canonical name field as used by CiviCase XML.
    *
-   * This appears to be "label_b_a", but IMHO "name_b_a" would be more
+   * This appears to be "label_a_b", but IMHO "name_a_b" would be more
    * sensible.
    */
-  const REL_TYPE_CNAME = 'label_b_a';
+  const REL_TYPE_CNAME = 'label_a_b';
 
   /**
    * @param $caseType

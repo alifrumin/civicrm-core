@@ -262,7 +262,7 @@
       $scope.activityTypeOptions = _.map(apiCalls.actTypes.values, formatActivityTypeOption);
       $scope.defaultAssigneeTypes = apiCalls.defaultAssigneeTypes.values;
       $scope.relationshipTypeOptions = _.map(apiCalls.relTypes.values, function(type) {
-        return {id: type[REL_TYPE_CNAME], text: type.label_b_a};
+        return {id: type[REL_TYPE_CNAME], text: type.label_a_b};
       });
       $scope.defaultRelationshipTypeOptions = getDefaultRelationshipTypeOptions();
       // stores the default assignee values indexed by their option name:
