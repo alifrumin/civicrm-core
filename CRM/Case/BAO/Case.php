@@ -1227,12 +1227,6 @@ SELECT case_status.label AS case_status, status_id, civicrm_case_type.title AS c
         $caseRoles = CRM_Utils_Array::rekey($caseInfo['case_type_id.definition']['caseRoles'], 'name');
       }
     }
-    // Hack to use list of case roles in an `IN`
-    $relTypeLabels = [];
-    foreach ($caseRoles as $caseRole) {
-     $relTypeLabels[] = CRM_Utils_Type::validate($caseRole['name'], 'String');
-    }
-    $relTypeLabelList = '"' . implode('", "', $relTypeLabels) . '"';
 
     $values = array();
     $query = <<<HERESQL
@@ -1240,7 +1234,6 @@ SELECT case_status.label AS case_status, status_id, civicrm_case_type.title AS c
     FROM civicrm_relationship cr
     JOIN civicrm_relationship_type crt
      ON crt.id = cr.relationship_type_id
-     AND crt.label_b_a IN ($relTypeLabelList)
     JOIN civicrm_contact cc
      ON cc.id = cr.contact_id_a
      AND cc.is_deleted <> 1
@@ -1258,7 +1251,6 @@ SELECT case_status.label AS case_status, status_id, civicrm_case_type.title AS c
     FROM civicrm_relationship cr
     JOIN civicrm_relationship_type crt
      ON crt.id = cr.relationship_type_id
-     AND crt.label_a_b IN ($relTypeLabelList)
     JOIN civicrm_contact cc
      ON cc.id = cr.contact_id_b
      AND cc.is_deleted <> 1
