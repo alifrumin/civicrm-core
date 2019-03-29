@@ -85,7 +85,7 @@ class CRM_Case_Form_AddToCaseAsRole extends CRM_Contact_Form_Task {
       $params['contact_id_b'] = $contacts;
       CRM_Contact_BAO_Relationship::createMultiple($params, 'a');
     }
-    
+
     $url = CRM_Utils_System::url(
       'civicrm/contact/view/case',
       [

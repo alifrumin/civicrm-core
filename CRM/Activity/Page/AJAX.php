@@ -161,7 +161,7 @@ class CRM_Activity_Page_AJAX {
 
     foreach ($caseRelationships as $key => $value) {
       // This role has been filled
-      unset($caseRoles[$value['relation_type'] . '_'. $value['relationship_direction']]);
+      unset($caseRoles[$value['relation_type'] . '_' . $value['relationship_direction']]);
       // mark original case relationships record to use on setting edit links below
       $caseRelationships[$key]['source'] = 'caseRel';
     }

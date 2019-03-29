@@ -113,7 +113,7 @@ class CRM_Case_ManagedEntities {
     $validRelTypes = [];
     foreach ($relationshipInfo as $id => $relTypeDetails) {
       $validRelTypes["{$id}_a_b"] = $relTypeDetails['label_a_b'];
-      if ($relTypeDetails['label_a_b']!= $relTypeDetails['label_b_a']) {
+      if ($relTypeDetails['label_a_b'] != $relTypeDetails['label_b_a']) {
         $validRelTypes["{$id}_b_a"] = $relTypeDetails['label_b_a'];
       }
     }
@@ -149,6 +149,7 @@ class CRM_Case_ManagedEntities {
         $result[] = $managed;
       }
     }
+
     return $result;
   }
 
