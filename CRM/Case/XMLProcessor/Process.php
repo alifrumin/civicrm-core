@@ -238,7 +238,7 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
         'start_date' => date("Ymd"),
         'end_date' => CRM_Utils_Array::value('relationship_end_date', $params),
       );
-      
+
       if (substr($relationshipType, -4) == '_b_a') {
         $relationshipParams['contact_id_b'] = $clientId;
         $relationshipParams['contact_id_a'] = $params['creatorID'];

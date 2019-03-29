@@ -113,7 +113,7 @@ class CRM_Case_ManagedEntities {
     $validRelTypes = [];
     foreach ($relationshipInfo as $id => $relTypeDetails) {
       $validRelTypes["{$id}_a_b"] = $relTypeDetails['label_a_b'];
-      if ($relTypeDetails['label_a_b']!= $relTypeDetails['label_b_a']) {
+      if ($relTypeDetails['label_a_b'] != $relTypeDetails['label_b_a']) {
         $validRelTypes["{$id}_b_a"] = $relTypeDetails['label_b_a'];
       }
     }
@@ -139,6 +139,7 @@ class CRM_Case_ManagedEntities {
           'contact_sub_type_b' => NULL,
         ),
       );
+
       // We'll create managed-entity if this record doesn't exist yet
       // or if we previously decided to manage this record.
       if (!in_array($relType, $validRelTypes)) {
@@ -148,6 +149,7 @@ class CRM_Case_ManagedEntities {
         $result[] = $managed;
       }
     }
+
     return $result;
   }
 
