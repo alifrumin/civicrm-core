@@ -109,6 +109,14 @@ class CRM_Case_ManagedEntities {
    */
   public static function createManagedRelationshipTypes(CRM_Case_XMLRepository $xmlRepo, CRM_Core_ManagedEntities $me) {
     $result = [];
+    $relationshipInfo = CRM_Core_PseudoConstant::relationshipType('label', TRUE, NULL);
+    $validRelTypes = [];
+    foreach ($relationshipInfo as $id => $relTypeDetails) {
+      $validRelTypes["{$id}_a_b"] = $relTypeDetails['label_a_b'];
+      if ($relTypeDetails['label_a_b']!= $relTypeDetails['label_b_a']) {
+        $validRelTypes["{$id}_b_a"] = $relTypeDetails['label_b_a'];
+      }
+    }
 
     $relTypes = $xmlRepo->getAllDeclaredRelationshipTypes();
     foreach ($relTypes as $relType) {
@@ -132,11 +140,15 @@ class CRM_Case_ManagedEntities {
         ],
       ];
 
-      if ($me->get($managed['module'], $managed['name'])) {
+      // We'll create managed-entity if this record doesn't exist yet
+      // or if we previously decided to manage this record.
+      if (!in_array($relType, $validRelTypes)) {
+        $result[] = $managed;
+      }
+      elseif ($me->get($managed['module'], $managed['name'])) {
         $result[] = $managed;
       }
     }
-
     return $result;
   }
 
