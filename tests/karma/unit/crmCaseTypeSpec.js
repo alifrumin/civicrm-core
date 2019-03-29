@@ -199,6 +199,30 @@ describe('crmCaseType', function() {
             }
           ]
         },
+        relTypesForm: {
+          values: [
+            {
+                "key": "14_b_a",
+                "value": "Benefits Specialist"
+            },
+            {
+                "key": "14_a_b",
+                "value": "Benefits Specialist is"
+            },
+            {
+                "key": "9_b_a",
+                "value": "Case Coordinator"
+            },
+            {
+                "key": "9_a_b",
+                "value": "Case Coordinator is"
+            },
+            {
+                "key": "2_b_a",
+                "value": "Spouse of"
+            }
+          ]
+        },
         caseType: {
           "id": "1",
           "name": "housing_support",
