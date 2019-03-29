@@ -110,41 +110,44 @@ class CRM_Case_ManagedEntities {
   public static function createManagedRelationshipTypes(CRM_Case_XMLRepository $xmlRepo, CRM_Core_ManagedEntities $me) {
     $result = array();
     $relationshipInfo = CRM_Core_PseudoConstant::relationshipType('label', TRUE, NULL);
-    $validRelTypes = array_merge(
-      CRM_Utils_Array::collect('label_a_b', $relationshipInfo),
-      CRM_Utils_Array::collect('label_b_a', $relationshipInfo)
-    );
+    $validRelTypes = [];
+    foreach ($relationshipInfo as $id => $relTypeDetails) {
+      $validRelTypes["{$id}_a_b"] = $relTypeDetails['label_a_b'];
+      if ($relTypeDetails['label_a_b']!= $relTypeDetails['label_b_a']) {
+        $validRelTypes["{$id}_b_a"] = $relTypeDetails['label_b_a'];
+      }
+    }
 
     $relTypes = $xmlRepo->getAllDeclaredRelationshipTypes();
     foreach ($relTypes as $relType) {
+      $managed = array(
+        'module' => 'civicrm',
+        'name' => "civicase:rel:$relType",
+        'entity' => 'RelationshipType',
+        'update' => 'never',
+        'cleanup' => 'unused',
+        'params' => array(
+          'version' => 3,
+          'name_a_b' => "$relType is",
+          'name_b_a' => $relType,
+          'label_a_b' => "$relType is",
+          'label_b_a' => $relType,
+          'description' => $relType,
+          'contact_type_a' => 'Individual',
+          'contact_type_b' => 'Individual',
+          'contact_sub_type_a' => NULL,
+          'contact_sub_type_b' => NULL,
+        ),
+      );
       // We'll create managed-entity if this record doesn't exist yet
       // or if we previously decided to manage this record.
       if (!in_array($relType, $validRelTypes)) {
-        $result[] = array(
-          'module' => 'civicrm',
-          'name' => "civicase:rel:$relType",
-          'entity' => 'RelationshipType',
-          'update' => 'never',
-          'cleanup' => 'unused',
-          'params' => array(
-            'version' => 3,
-            'name_a_b' => "$relType is",
-            'name_b_a' => $relType,
-            'label_a_b' => "$relType is",
-            'label_b_a' => $relType,
-            'description' => $relType,
-            'contact_type_a' => 'Individual',
-            'contact_type_b' => 'Individual',
-            'contact_sub_type_a' => NULL,
-            'contact_sub_type_b' => NULL,
-          ),
-        );
+        $result[] = $managed;
       }
       elseif ($me->get($managed['module'], $managed['name'])) {
         $result[] = $managed;
       }
     }
-
     return $result;
   }
 
