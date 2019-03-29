@@ -434,7 +434,7 @@ WHERE cc.contact_id = %1 AND civicrm_case_type.name = '{$caseType}'";
       'civicrm_case.status_id as case_status_id',
       't_act.status_id as status_id',
       'civicrm_case.start_date as case_start_date',
-      "IF(case_relationship.contact_id_b = $userID, case_relation_type.label_a_b, case_relation_type.label_b_a) as case_role",
+      "GROUP_CONCAT(DISTINCT IF(case_relationship.contact_id_b = $userID, case_relation_type.label_a_b, case_relation_type.label_b_a) SEPARATOR ', ') as case_role",
       't_act.activity_date_time as activity_date_time',
       't_act.id as activity_id',
     );
@@ -535,11 +535,11 @@ HERESQL;
     $whereClauses = array('civicrm_case.is_deleted = 0 AND civicrm_contact.is_deleted <> 1');
 
     if (!$allCases) {
-      $whereClauses[] .= " case_relationship.contact_id_b = {$userID} OR case_relationship.contact_id_a = {$userID}";
-      $whereClauses[] .= ' case_relationship.is_active ';
+      $whereClauses[] = "(case_relationship.contact_id_b = {$userID} OR case_relationship.contact_id_a = {$userID})";
+      $whereClauses[] = 'case_relationship.is_active';
     }
     if (empty($params['status_id']) && ($type == 'upcoming' || $type == 'any')) {
-      $whereClauses[] = " civicrm_case.status_id != " . CRM_Core_PseudoConstant::getKey('CRM_Case_BAO_Case', 'case_status_id', 'Closed');
+      $whereClauses[] = "civicrm_case.status_id != " . CRM_Core_PseudoConstant::getKey('CRM_Case_BAO_Case', 'case_status_id', 'Closed');
     }
 
     foreach (array('case_type_id', 'status_id') as $column) {
@@ -704,13 +704,13 @@ HERESQL;
 
     // build rows with actual data
     $rows = array();
-    $myGroupByClause = $mySelectClause = $myCaseFromClause = $myCaseWhereClause = '';
+    $myGroupByClause = $mySelectClause = $myCaseFromClause = $myCaseWhereClauseA = $myCaseWhereClauseB = '';
 
     if ($allCases) {
       $userID = 'null';
       $all = 1;
       $case_owner = 1;
-      $myGroupByClause = ' GROUP BY civicrm_case.id';
+      $myGroupByClauseB = ' GROUP BY civicrm_case.id';
     }
     else {
       $all = 0;
@@ -720,8 +720,8 @@ HERESQL;
       $myCaseWhereClauseB = " AND case_relationship.contact_id_b = {$userID} AND case_relationship.is_active ";
       $myGroupByClauseB = " GROUP BY CONCAT(case_relationship.case_id,'-',case_relationship.contact_id_b)";
     }
-    $myGroupByClause .= ", case_status.label, status_id, case_type_id";
-
+    $myGroupByClauseB .= ", case_status.label, status_id, case_type_id";
+    $myGroupByClauseA = $myGroupByClauseB;
     // FIXME: This query could be a lot more efficient if it used COUNT() instead of returning all rows and then counting them with php
     $query = "
 SELECT case_status.label AS case_status, status_id, civicrm_case_type.title AS case_type,
@@ -1266,7 +1266,7 @@ SELECT case_status.label AS case_status, status_id, civicrm_case_type.title AS c
 HERESQL;
     $params = array(
       1 => array($caseID, 'Integer'),
-      2 => array(implode(',', $caseInfo['client_id']), 'String')
+      2 => array(implode(',', $caseInfo['client_id']), 'String'),
     );
     $dao = CRM_Core_DAO::executeQuery($query, $params);
 
@@ -3268,7 +3268,7 @@ WHERE id IN (' . implode(',', $copiedActivityIds) . ')';
   /**
    * Fetch Case Role direction from Case Type
    */
-  function getCaseRoleDirection($caseId, $roleTypeId = NULL) {
+  public static function getCaseRoleDirection($caseId, $roleTypeId = NULL) {
     try {
       $case = civicrm_api3('Case', 'getsingle', array('id' => $caseId));
     }
@@ -3318,4 +3318,5 @@ WHERE id IN (' . implode(',', $copiedActivityIds) . ')';
       return $caseRoles;
     }
   }
+
 }
