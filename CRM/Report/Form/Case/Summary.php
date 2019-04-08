@@ -308,7 +308,7 @@ inner join civicrm_contact $c2 on ${c2}.id=${ccc}.contact_id
 
   public function where() {
     $clauses = [];
-    if ($this->_params['fields']['label_b_a'] == 1) {
+    if (!empty($this->_params['fields']['label_b_a']) && $this->_params['fields']['label_b_a'] == 1) {
       $clauses[] = 'contact_civireport.sort_name !=  c2_civireport.sort_name';
     }
     $this->_having = '';
