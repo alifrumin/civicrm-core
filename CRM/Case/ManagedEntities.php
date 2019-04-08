@@ -137,13 +137,8 @@ class CRM_Case_ManagedEntities {
           'contact_type_b' => 'Individual',
           'contact_sub_type_a' => NULL,
           'contact_sub_type_b' => NULL,
-<<<<<<< HEAD
         ],
       ];
-=======
-        ),
-      );
->>>>>>> Fix style warnings and test failures
 
       // We'll create managed-entity if this record doesn't exist yet
       // or if we previously decided to manage this record.
