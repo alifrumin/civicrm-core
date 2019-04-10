@@ -716,9 +716,9 @@ HERESQL;
       $all = 0;
       $case_owner = 2;
       $myCaseWhereClauseA = " AND case_relationship.contact_id_a = {$userID} AND case_relationship.is_active ";
-      $myGroupByClauseA = " GROUP BY CONCAT(case_relationship.case_id,'-',case_relationship.contact_id_a)";
+      $myGroupByClauseA = " GROUP BY CONCAT(civicrm_case.id,'-',case_relationship.contact_id_a)";
       $myCaseWhereClauseB = " AND case_relationship.contact_id_b = {$userID} AND case_relationship.is_active ";
-      $myGroupByClauseB = " GROUP BY CONCAT(case_relationship.case_id,'-',case_relationship.contact_id_b)";
+      $myGroupByClauseB = " GROUP BY CONCAT(civicrm_case.id,'-',case_relationship.contact_id_b)";
     }
     $myGroupByClauseB .= ", case_status.label, status_id, case_type_id";
     $myGroupByClauseA = $myGroupByClauseB;
