@@ -720,7 +720,7 @@ HERESQL;
       $myCaseWhereClauseB = " AND case_relationship.contact_id_b = {$userID} AND case_relationship.is_active ";
       $myGroupByClauseB = " GROUP BY CONCAT(civicrm_case.id,'-',case_relationship.contact_id_b)";
     }
-    $myGroupByClauseB .= ", case_status.label, status_id, case_type_id";
+    $myGroupByClauseB .= ", case_status.label, status_id, case_type_id, civicrm_case.id";
     $myGroupByClauseA = $myGroupByClauseB;
     // FIXME: This query could be a lot more efficient if it used COUNT() instead of returning all rows and then counting them with php
     $query = "
