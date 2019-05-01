@@ -97,17 +97,28 @@ class CRM_Case_XMLProcessor {
   }
 
   /**
+   * Get all relationship type labels
+   *
+   * TODO: These should probably be names, but under legacy behavior this has
+   * been labels.
+   *
+   * @param bool $fromXML
+   *   Is this to be used for lookup of values from XML?
+   *   Relationships are recorded in XML from the perspective of the non-client
+   *   while relationships in the UI and everywhere else are from the
+   *   perspective of the client.  Since the XML can't be expected to be
+   *   switched, the direction needs to be translated.
    * @return array
    */
-  public function &allRelationshipTypes() {
+  public function &allRelationshipTypes($fromXML = FALSE) {
     if (self::$relationshipTypes === NULL) {
       $relationshipInfo = CRM_Core_PseudoConstant::relationshipType('label', TRUE);
 
       self::$relationshipTypes = [];
       foreach ($relationshipInfo as $id => $info) {
-        self::$relationshipTypes[$id . '_b_a'] = $info['label_b_a'];
+        self::$relationshipTypes[$id . '_b_a'] = ($fromXML) ? $info['label_a_b'] : $info['label_b_a'];
         if ($info['label_b_a'] !== $info['label_a_b']) {
-          self::$relationshipTypes[$id . '_a_b'] = $info['label_a_b'];
+          self::$relationshipTypes[$id . '_a_b'] = ($fromXML) ? $info['label_b_a'] : $info['label_a_b'];
         }
       }
     }

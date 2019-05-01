@@ -181,7 +181,7 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
    * @return array|mixed
    */
   public function &caseRoles($caseRolesXML, $isCaseManager = FALSE) {
-    $relationshipTypes = &$this->allRelationshipTypes();
+    $relationshipTypes = &$this->allRelationshipTypes(TRUE);
 
     $result = [];
     foreach ($caseRolesXML as $caseRoleXML) {
@@ -195,7 +195,7 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
         }
 
         if (!$isCaseManager) {
-          $result[$relationshipTypeID] = $relationshipTypeName;
+          $result[$relationshipTypeID] = $relationshipTypes[$relationshipTypeID];
         }
         elseif ($relationshipTypeXML->manager == 1) {
           return $relationshipTypeID;
@@ -213,7 +213,9 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
    * @throws Exception
    */
   public function createRelationships($relationshipTypeName, &$params) {
-    $relationshipTypes = &$this->allRelationshipTypes();
+    // The relationshipTypeName is coming from XML, so the argument should be
+    // `TRUE`
+    $relationshipTypes = &$this->allRelationshipTypes(TRUE);
     // get the relationship
     $relationshipType = array_search($relationshipTypeName, $relationshipTypes);
 
@@ -353,6 +355,8 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
    * @param SimpleXMLElement $caseTypeXML
    *
    * @return array<string> symbolic relationship-type names
+   *
+   * Relationships are straight from XML, described from perspective of non-client
    */
   public function getDeclaredRelationshipTypes($caseTypeXML) {
     $result = [];

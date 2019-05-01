@@ -257,6 +257,8 @@ class CRM_Case_XMLRepository {
 
   /**
    * @return array<string> symbolic-names of relationship-types
+   *
+   * Relationships are straight from XML, described from perspective of non-client
    */
   public function getAllDeclaredRelationshipTypes() {
     $result = [];
