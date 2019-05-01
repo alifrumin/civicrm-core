@@ -194,15 +194,27 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
           continue;
         }
 
+        $relationshipTypeIDSwitched = $this->flipCaseRoleDirection($relationshipTypeID);
         if (!$isCaseManager) {
-          $result[$relationshipTypeID] = $relationshipTypeName;
+          $result[$relationshipTypeIDSwitched] = $relationshipTypes[$relationshipTypeIDSwitched];
         }
         elseif ($relationshipTypeXML->manager == 1) {
-          return $relationshipTypeID;
+          return $relationshipTypeIDSwitched;
         }
       }
     }
+    // print_r($result); die();
     return $result;
+  }
+
+  public function flipCaseRoleDirection($relationshipTypeID) {
+    if (substr($relationshipTypeID, -4) == '_b_a') {
+      $relationshipTypeIDSwitched = substr($relationshipTypeID, 0, -4) . '_a_b';
+    }
+    if (substr($relationshipTypeID, -4) == '_a_b') {
+      $relationshipTypeIDSwitched = substr($relationshipTypeID, 0, -4) . '_b_a';
+    }
+    return $relationshipTypeIDSwitched;
   }
 
   /**
@@ -240,12 +252,12 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
       ];
 
       if (substr($relationshipType, -4) == '_b_a') {
-        $relationshipParams['contact_id_b'] = $clientId;
-        $relationshipParams['contact_id_a'] = $params['creatorID'];
-      }
-      if (substr($relationshipType, -4) == '_a_b') {
         $relationshipParams['contact_id_a'] = $clientId;
         $relationshipParams['contact_id_b'] = $params['creatorID'];
+      }
+      if (substr($relationshipType, -4) == '_a_b') {
+        $relationshipParams['contact_id_b'] = $clientId;
+        $relationshipParams['contact_id_a'] = $params['creatorID'];
       }
 
       if (!$this->createRelationship($relationshipParams)) {
