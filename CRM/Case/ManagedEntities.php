@@ -120,6 +120,12 @@ class CRM_Case_ManagedEntities {
 
     $relTypes = $xmlRepo->getAllDeclaredRelationshipTypes();
     foreach ($relTypes as $relType) {
+      // Making assumption that client is the A side of the relationship.
+      // Relationship label coming from XML, meaning from perspective of
+      // non-client.
+
+      // These assumptions only apply if a case type is introduced without the
+      // relationship types already existing.
       $managed = [
         'module' => 'civicrm',
         'name' => "civicase:rel:$relType",
@@ -133,8 +139,8 @@ class CRM_Case_ManagedEntities {
           'label_a_b' => "$relType is",
           'label_b_a' => $relType,
           'description' => $relType,
-          'contact_type_a' => 'Individual',
-          'contact_type_b' => 'Individual',
+          'contact_type_a' => NULL,
+          'contact_type_b' => NULL,
           'contact_sub_type_a' => NULL,
           'contact_sub_type_b' => NULL,
         ],
