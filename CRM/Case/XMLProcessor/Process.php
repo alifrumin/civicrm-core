@@ -181,7 +181,7 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
    * @return array|mixed
    */
   public function &caseRoles($caseRolesXML, $isCaseManager = FALSE) {
-    $relationshipTypes = &$this->allRelationshipTypes();
+    $relationshipTypes = &$this->allRelationshipTypes(TRUE);
 
     $result = [];
     foreach ($caseRolesXML as $caseRoleXML) {
@@ -194,27 +194,15 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
           continue;
         }
 
-        $relationshipTypeIDSwitched = $this->flipCaseRoleDirection($relationshipTypeID);
         if (!$isCaseManager) {
-          $result[$relationshipTypeIDSwitched] = $relationshipTypes[$relationshipTypeIDSwitched];
+          $result[$relationshipTypeID] = $relationshipTypes[$relationshipTypeID];
         }
         elseif ($relationshipTypeXML->manager == 1) {
-          return $relationshipTypeIDSwitched;
+          return $relationshipTypeID;
         }
       }
     }
-    // print_r($result); die();
     return $result;
-  }
-
-  public function flipCaseRoleDirection($relationshipTypeID) {
-    if (substr($relationshipTypeID, -4) == '_b_a') {
-      $relationshipTypeIDSwitched = substr($relationshipTypeID, 0, -4) . '_a_b';
-    }
-    if (substr($relationshipTypeID, -4) == '_a_b') {
-      $relationshipTypeIDSwitched = substr($relationshipTypeID, 0, -4) . '_b_a';
-    }
-    return $relationshipTypeIDSwitched;
   }
 
   /**
@@ -225,7 +213,9 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
    * @throws Exception
    */
   public function createRelationships($relationshipTypeName, &$params) {
-    $relationshipTypes = &$this->allRelationshipTypes();
+    // The relationshipTypeName is coming from XML, so the argument should be
+    // `TRUE`
+    $relationshipTypes = &$this->allRelationshipTypes(TRUE);
     // get the relationship
     $relationshipType = array_search($relationshipTypeName, $relationshipTypes);
 
@@ -252,12 +242,12 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
       ];
 
       if (substr($relationshipType, -4) == '_b_a') {
-        $relationshipParams['contact_id_a'] = $clientId;
-        $relationshipParams['contact_id_b'] = $params['creatorID'];
-      }
-      if (substr($relationshipType, -4) == '_a_b') {
         $relationshipParams['contact_id_b'] = $clientId;
         $relationshipParams['contact_id_a'] = $params['creatorID'];
+      }
+      if (substr($relationshipType, -4) == '_a_b') {
+        $relationshipParams['contact_id_a'] = $clientId;
+        $relationshipParams['contact_id_b'] = $params['creatorID'];
       }
 
       if (!$this->createRelationship($relationshipParams)) {
@@ -365,6 +355,8 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
    * @param SimpleXMLElement $caseTypeXML
    *
    * @return array<string> symbolic relationship-type names
+   *
+   * Relationships are straight from XML, described from perspective of non-client
    */
   public function getDeclaredRelationshipTypes($caseTypeXML) {
     $result = [];
