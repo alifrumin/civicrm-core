@@ -109,14 +109,17 @@ class CRM_Case_ManagedEntities {
    */
   public static function createManagedRelationshipTypes(CRM_Case_XMLRepository $xmlRepo, CRM_Core_ManagedEntities $me) {
     $result = [];
-    $relationshipInfo = CRM_Core_PseudoConstant::relationshipType('label', TRUE, NULL);
-    $validRelTypes = [];
-    foreach ($relationshipInfo as $id => $relTypeDetails) {
-      $validRelTypes["{$id}_a_b"] = $relTypeDetails['label_a_b'];
-      if ($relTypeDetails['label_a_b'] != $relTypeDetails['label_b_a']) {
-        $validRelTypes["{$id}_b_a"] = $relTypeDetails['label_b_a'];
+
+    if (!isset(Civi::$statics[__CLASS__]['reltypes'])) {
+      $relationshipInfo = CRM_Core_PseudoConstant::relationshipType('label', TRUE, NULL);
+      foreach ($relationshipInfo as $id => $relTypeDetails) {
+        Civi::$statics[__CLASS__]['reltypes']["{$id}_a_b"] = $relTypeDetails['label_a_b'];
+        if ($relTypeDetails['label_a_b'] != $relTypeDetails['label_b_a']) {
+          Civi::$statics[__CLASS__]['reltypes']["{$id}_b_a"] = $relTypeDetails['label_b_a'];
+        }
       }
     }
+    $validRelTypes = Civi::$statics[__CLASS__]['reltypes'];
 
     $relTypes = $xmlRepo->getAllDeclaredRelationshipTypes();
     foreach ($relTypes as $relType) {
