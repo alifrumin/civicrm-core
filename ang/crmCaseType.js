@@ -262,6 +262,7 @@
       $scope.activityTypeOptions = _.map(apiCalls.actTypes.values, formatActivityTypeOption);
       $scope.defaultAssigneeTypes = apiCalls.defaultAssigneeTypes.values;
       $scope.relationshipTypeOptions = getRelationshipTypeOptions(false);
+      console.log($scope.relationshipTypeOptions);
       $scope.defaultRelationshipTypeOptions = getRelationshipTypeOptions(true);
       // stores the default assignee values indexed by their option name:
       $scope.defaultAssigneeTypeValues = _.chain($scope.defaultAssigneeTypes)
@@ -329,6 +330,15 @@
 
           if (isDefaultAssigneeTypeUndefined) {
             type.default_assignee_type = defaultAssigneeDefaultValue.value;
+          }
+        });
+      });
+
+      // go lookup and add client-perspective labels for $scope.caseType.definition.caseRoles
+      _.each($scope.caseType.definition.caseRoles, function (set) {
+        _.each(getRelationshipTypeOptions(false), function (relTypes) {
+          if (relTypes.label == set.name) {
+            set.otherdirection = relTypes.value;
           }
         });
       });
@@ -437,6 +447,7 @@
       var names = _.pluck($scope.caseType.definition.caseRoles, 'name');
       if (!_.contains(names, roleName)) {
         if (_.where($scope.relationshipTypeOptions, {id: roleName}).length) {
+          // TODO: push label with client-perspective label
           roles.push({name: roleName});
         } else {
            CRM.loadForm(CRM.url('civicrm/admin/reltype', {action: 'add', reset: 1, label_a_b: roleName}))
@@ -542,6 +553,8 @@
       if ($scope.caseType.definition.activityAsgmtGrps) {
         $scope.caseType.definition.activityAsgmtGrps = $scope.caseType.definition.activityAsgmtGrps.toString().split(",");
       }
+
+      // TODO: strip out labels from $scope.caseType.definition.caseRoles
 
       var result = crmApi('CaseType', 'create', $scope.caseType, true);
       result.then(function(data) {
