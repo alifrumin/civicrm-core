@@ -354,9 +354,8 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
   /**
    * @param SimpleXMLElement $caseTypeXML
    *
-   * @return array<string> symbolic relationship-type names
-   *
-   * Relationships are straight from XML, described from perspective of non-client
+   * @return array<string> symbolic relationship-type names Relationships are
+   *    straight from XML, described from perspective of non-client
    */
   public function getDeclaredRelationshipTypes($caseTypeXML) {
     $result = [];

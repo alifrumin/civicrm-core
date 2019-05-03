@@ -284,17 +284,31 @@
     function getRelationshipTypeOptions($isDefault) {
       return _.transform(apiCalls.relTypes.values, function(result, relType) {
         var isBidirectionalRelationship = relType.label_a_b === relType.label_b_a;
-
-        result.push({
-          label: relType.label_b_a,
-          value: ($isDefault) ? relType.id + '_a_b' : relType.name_a_b
-        });
-
-        if (!isBidirectionalRelationship) {
+        if ($isDefault) {
           result.push({
-            label: relType.label_a_b,
-            value: ($isDefault) ? relType.id + '_b_a' : relType.name_b_a
+            label: relType.label_b_a,
+            value: relType.id + '_a_b'
           });
+
+          if (!isBidirectionalRelationship) {
+            result.push({
+              label: relType.label_a_b,
+              value: relType.id + '_b_a'
+            });
+          }
+        }
+        else {
+          result.push({
+            text: relType.label_b_a,
+            id: relType.name_a_b
+          });
+
+          if (!isBidirectionalRelationship) {
+            result.push({
+              text: relType.label_a_b,
+              id: relType.name_b_a
+            });
+          }
         }
       }, []);
     }
@@ -329,6 +343,15 @@
 
           if (isDefaultAssigneeTypeUndefined) {
             type.default_assignee_type = defaultAssigneeDefaultValue.value;
+          }
+        });
+      });
+
+      // go lookup and add client-perspective labels for $scope.caseType.definition.caseRoles
+      _.each($scope.caseType.definition.caseRoles, function (set) {
+        _.each($scope.relationshipTypeOptions, function (relTypes) {
+          if (relTypes.text == set.name) {
+            set.displaylabel = relTypes.id;
           }
         });
       });
@@ -436,13 +459,15 @@
     $scope.addRole = function(roles, roleName) {
       var names = _.pluck($scope.caseType.definition.caseRoles, 'name');
       if (!_.contains(names, roleName)) {
-        if (_.where($scope.relationshipTypeOptions, {id: roleName}).length) {
-          roles.push({name: roleName});
+        var matchingRoles = _.filter($scope.relationshipTypeOptions, {id: roleName});
+        if (matchingRoles.length) {
+          var matchingRole = matchingRoles.shift();
+          roles.push({name: roleName, displaylabel: matchingRole.text});
         } else {
            CRM.loadForm(CRM.url('civicrm/admin/reltype', {action: 'add', reset: 1, label_a_b: roleName}))
             .on('crmFormSuccess', function(e, data) {
               var newType = _.values(data.relationshipType)[0];
-              roles.push({name: newType.label_a_b});
+              roles.push({name: newType.label_a_b, displaylabel: newType.label_b_a});
               // Assume that the case role should be A-B but add both directions as options.
               $scope.relationshipTypeOptions.push({id: newType.label_a_b, text: newType.label_a_b});
               if (newType.label_a_b != newType.label_b_a) {
@@ -542,6 +567,13 @@
       if ($scope.caseType.definition.activityAsgmtGrps) {
         $scope.caseType.definition.activityAsgmtGrps = $scope.caseType.definition.activityAsgmtGrps.toString().split(",");
       }
+
+      function dropDisplaylabel (v) {
+        delete v.displaylabel;
+      }
+
+      // strip out labels from $scope.caseType.definition.caseRoles
+      _.map($scope.caseType.definition.caseRoles, dropDisplaylabel);
 
       var result = crmApi('CaseType', 'create', $scope.caseType, true);
       result.then(function(data) {
