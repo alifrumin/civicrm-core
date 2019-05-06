@@ -181,7 +181,11 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
    * @return array|mixed
    */
   public function &caseRoles($caseRolesXML, $isCaseManager = FALSE) {
+    // Look up relationship types according to the XML convention (described
+    // from perspective of non-client) but return the labels according to the UI
+    // convention (described from perspective of client)
     $relationshipTypes = &$this->allRelationshipTypes(TRUE);
+    $relationshipTypesToReturn = &$this->allRelationshipTypes(FALSE);
 
     $result = [];
     foreach ($caseRolesXML as $caseRoleXML) {
@@ -195,7 +199,7 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
         }
 
         if (!$isCaseManager) {
-          $result[$relationshipTypeID] = $relationshipTypes[$relationshipTypeID];
+          $result[$relationshipTypeID] = $relationshipTypesToReturn[$relationshipTypeID];
         }
         elseif ($relationshipTypeXML->manager == 1) {
           return $relationshipTypeID;

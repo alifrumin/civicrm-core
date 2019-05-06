@@ -41,14 +41,6 @@ class CRM_Case_XMLProcessor {
   public static $activityTypes = NULL;
 
   /**
-   * FIXME: This does *NOT* belong in a static property, but we're too late in
-   * the 4.5-cycle to do the necessary cleanup.
-   *
-   * @var array|null array(int $id => string $relTypeCname)
-   */
-  public static $relationshipTypes = NULL;
-
-  /**
    * @param $caseType
    *
    * @return FALSE|SimpleXMLElement
@@ -111,19 +103,19 @@ class CRM_Case_XMLProcessor {
    * @return array
    */
   public function &allRelationshipTypes($fromXML = FALSE) {
-    if (self::$relationshipTypes === NULL) {
+    if (!isset(Civi::$statics[__CLASS__]['reltypes'][$fromXML])) {
       $relationshipInfo = CRM_Core_PseudoConstant::relationshipType('label', TRUE);
 
-      self::$relationshipTypes = [];
+      Civi::$statics[__CLASS__]['reltypes'][$fromXML] = [];
       foreach ($relationshipInfo as $id => $info) {
-        self::$relationshipTypes[$id . '_b_a'] = ($fromXML) ? $info['label_a_b'] : $info['label_b_a'];
+        Civi::$statics[__CLASS__]['reltypes'][$fromXML][$id . '_b_a'] = ($fromXML) ? $info['label_a_b'] : $info['label_b_a'];
         if ($info['label_b_a'] !== $info['label_a_b']) {
-          self::$relationshipTypes[$id . '_a_b'] = ($fromXML) ? $info['label_b_a'] : $info['label_a_b'];
+          Civi::$statics[__CLASS__]['reltypes'][$fromXML][$id . '_a_b'] = ($fromXML) ? $info['label_b_a'] : $info['label_a_b'];
         }
       }
     }
 
-    return self::$relationshipTypes;
+    return Civi::$statics[__CLASS__]['reltypes'][$fromXML];
   }
 
   /**
@@ -131,7 +123,7 @@ class CRM_Case_XMLProcessor {
    */
   public static function flushStaticCaches() {
     self::$activityTypes = NULL;
-    self::$relationshipTypes = NULL;
+    unset(Civi::$statics[__CLASS__]['reltypes']);
   }
 
 }
