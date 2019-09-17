@@ -40,7 +40,7 @@
       </tr>
       <tr class="crm-badge-layout-form-block-label_format_name">
         <td class="label">{$form.label_format_name.label}</td>
-        <td>{$form.label_format_name.html} {help id="id-label_format"}</td>
+        <td>{$form.label_format_name.html} <a class="crm-popup crm-hover-button" target="_blank" title="{ts}Edit Label Formats Options{/ts}" href="{crmURL p='civicrm/admin/labelFormats' q='reset=1'}"><i class="crm-i fa-wrench"></i></a> {help id="id-label_format"}</td>
       </tr>
       <tr class="crm-badge-layout-form-block-description">
         <td class="label">{$form.description.label}</td>
