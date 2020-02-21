@@ -785,7 +785,6 @@ INNER JOIN civicrm_contact contact_target ON ( contact_target.id = act.contact_i
     // 1. loop through entire submitted address array
     $skipFields = ['is_primary', 'location_type_id', 'is_billing', 'master_id', 'add_relationship', 'id', 'contact_id'];
     foreach ($address as & $values) {
-
       // 2. check if "Use another contact's address" is checked, if not continue
       // Additionally, if master_id is set (address was shared), set master_id to empty value.
       if (empty($values['use_shared_address'])) {
