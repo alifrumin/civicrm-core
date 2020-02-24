@@ -1020,7 +1020,7 @@ SELECT is_primary,
    *   Associated array of address params.
    */
   public static function processSharedAddress($addressId, $params) {
-    $query = 'SELECT id, contact_id FROM civicrm_address WHERE master_id = %1';
+    $query = 'SELECT id, contact_id, is_primary, location_type_id, is_billing FROM civicrm_address WHERE master_id = %1';
     $dao = CRM_Core_DAO::executeQuery($query, [1 => [$addressId, 'Integer']]);
 
     // legacy - for api backward compatibility
@@ -1034,30 +1034,29 @@ SELECT is_primary,
     $createRelationship = isset($params['add_relationship']) ? $params['add_relationship'] : TRUE;
 
     // unset contact id
-    $skipFields = ['is_primary', 'location_type_id', 'is_billing', 'contact_id'];
     if (isset($params['master_id']) && !CRM_Utils_System::isNull($params['master_id'])) {
       if ($createRelationship) {
         // call the function to create a relationship for the new shared address
         self::processSharedAddressRelationship($params['master_id'], $params['contact_id']);
       }
     }
-    else {
-      // else no new shares will be created, only update shared addresses
-      $skipFields[] = 'master_id';
-    }
-    foreach ($skipFields as $value) {
-      unset($params[$value]);
-    }
-
-    $addressDAO = new CRM_Core_DAO_Address();
     while ($dao->fetch()) {
       // call the function to update the relationship
       if ($createRelationship && isset($params['master_id']) && !CRM_Utils_System::isNull($params['master_id'])) {
         self::processSharedAddressRelationship($params['master_id'], $dao->contact_id);
       }
-      $addressDAO->copyValues($params);
-      $addressDAO->id = $dao->id;
-      $addressDAO->save();
+      $params['master_id'] = $addressId;
+      $fieldsToKeep = [
+        'id',
+        'contact_id',
+        'is_primary',
+        'location_type_id',
+        'is_billing',
+      ];
+      foreach ($fieldsToKeep as $key => $value) {
+        $params[$value] = $dao->$value;
+      }
+      CRM_Contact_BAO_Contact_Utils::processSharedAddress($params);
     }
   }
 

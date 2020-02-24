@@ -808,6 +808,7 @@ INNER JOIN civicrm_contact contact_target ON ( contact_target.id = act.contact_i
           $values[$field] = '';
         }
       }
+
       // 5. update address params to match shared address
       // make sure you preserve specific form values like location type, is_primary_ is_billing, master_id
       foreach ($masterAddress as $field => $value) {
