@@ -1020,6 +1020,7 @@ SELECT is_primary,
    *   Associated array of address params.
    */
   public static function processSharedAddress($addressId, $params) {
+    // Get all shared addresses for this master address
     $query = 'SELECT id, contact_id FROM civicrm_address WHERE master_id = %1';
     $dao = CRM_Core_DAO::executeQuery($query, [1 => [$addressId, 'Integer']]);
 
@@ -1034,31 +1035,42 @@ SELECT is_primary,
     $createRelationship = isset($params['add_relationship']) ? $params['add_relationship'] : TRUE;
 
     // unset contact id
-    $skipFields = ['is_primary', 'location_type_id', 'is_billing', 'contact_id'];
     if (isset($params['master_id']) && !CRM_Utils_System::isNull($params['master_id'])) {
       if ($createRelationship) {
         // call the function to create a relationship for the new shared address
         self::processSharedAddressRelationship($params['master_id'], $params['contact_id']);
       }
     }
-    else {
-      // else no new shares will be created, only update shared addresses
-      $skipFields[] = 'master_id';
-    }
-    foreach ($skipFields as $value) {
-      unset($params[$value]);
-    }
-
-    $addressDAO = new CRM_Core_DAO_Address();
     while ($dao->fetch()) {
       // call the function to update the relationship
       if ($createRelationship && isset($params['master_id']) && !CRM_Utils_System::isNull($params['master_id'])) {
         self::processSharedAddressRelationship($params['master_id'], $dao->contact_id);
       }
-      $addressDAO->copyValues($params);
-      $addressDAO->id = $dao->id;
-      $addressDAO->save();
+      self::updateSharedAddressses($dao->id, $params);
     }
+  }
+
+  /**
+   * Update the shared addresses
+   * @param  int $sharedAddressId    id of the shared address to be updated
+   * @param  array $params           address details to use to update shared addresses
+   */
+  function updateSharedAddressses($sharedAddressId, $params) {
+    $skipFields = ['is_primary', 'location_type_id', 'is_billing', 'contact_id'];
+
+    if (!isset($params['master_id']) || CRM_Utils_System::isNull($params['master_id'])) {
+      // update shared addresses
+      $skipFields[] = 'master_id';
+    }
+
+    foreach ($skipFields as $value) {
+      unset($params[$value]);
+    }
+
+    $addressDAO = new CRM_Core_DAO_Address();
+    $addressDAO->copyValues($params);
+    $addressDAO->id = $sharedAddressId;
+    $addressDAO->save();
   }
 
   /**
