@@ -357,42 +357,43 @@ WHERE lt.log_conn_id = %1
     $sql = "SELECT id, title FROM `{$this->db}`.log_civicrm_custom_group WHERE log_date <= %2 AND table_name = %3 ORDER BY log_date DESC LIMIT 1";
     $cgDao = CRM_Core_DAO::executeQuery($sql, $params);
     $cgDao->fetch();
-
-    $params[3] = [$cgDao->id, 'Integer'];
-    $sql = "
+    if ($cgDao->id) {
+      $params[3] = [$cgDao->id, 'Integer'];
+      $sql = "
 SELECT column_name, data_type, label, name, option_group_id
 FROM   `{$this->db}`.log_civicrm_custom_field
 WHERE  log_date <= %2
 AND    custom_group_id = %3
 ORDER BY log_date
 ";
-    $cfDao = CRM_Core_DAO::executeQuery($sql, $params);
+      $cfDao = CRM_Core_DAO::executeQuery($sql, $params);
 
-    while ($cfDao->fetch()) {
-      $titles[$cfDao->column_name] = "{$cgDao->title}: {$cfDao->label}";
+      while ($cfDao->fetch()) {
+        $titles[$cfDao->column_name] = "{$cgDao->title}: {$cfDao->label}";
 
-      switch ($cfDao->data_type) {
-        case 'Boolean':
-          $values[$cfDao->column_name] = ['0' => ts('false'), '1' => ts('true')];
-          break;
+        switch ($cfDao->data_type) {
+          case 'Boolean':
+            $values[$cfDao->column_name] = ['0' => ts('false'), '1' => ts('true')];
+            break;
 
-        case 'String':
-          $values[$cfDao->column_name] = [];
-          if (!empty($cfDao->option_group_id)) {
-            $params[3] = [$cfDao->option_group_id, 'Integer'];
-            $sql = "
+          case 'String':
+            $values[$cfDao->column_name] = [];
+            if (!empty($cfDao->option_group_id)) {
+              $params[3] = [$cfDao->option_group_id, 'Integer'];
+              $sql = "
 SELECT   label, value
 FROM     `{$this->db}`.log_civicrm_option_value
 WHERE    log_date <= %2
 AND      option_group_id = %3
 ORDER BY log_date
 ";
-            $ovDao = CRM_Core_DAO::executeQuery($sql, $params);
-            while ($ovDao->fetch()) {
-              $values[$cfDao->column_name][$ovDao->value] = $ovDao->label;
+              $ovDao = CRM_Core_DAO::executeQuery($sql, $params);
+              while ($ovDao->fetch()) {
+                $values[$cfDao->column_name][$ovDao->value] = $ovDao->label;
+              }
             }
-          }
-          break;
+            break;
+        }
       }
     }
 
