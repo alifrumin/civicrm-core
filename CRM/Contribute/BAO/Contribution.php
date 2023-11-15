@@ -2307,12 +2307,27 @@ INNER JOIN civicrm_activity ON civicrm_activity_contact.activity_id = civicrm_ac
 
       // for on behalf contribution source is individual and contributor is organization
       if ($sourceContactId && $sourceContactId != $contributorId) {
-        $relationshipTypeIds = CRM_Core_PseudoConstant::relationshipType('name');
-        // get rel type id for employee of relation
-        foreach ($relationshipTypeIds as $id => $typeVals) {
-          if ($typeVals['name_a_b'] == 'Employee of') {
-            $relationshipTypeId = $id;
-            break;
+        // If the user is signing up for a membership on behalf of an organization, look up what relationship type they are inheriting it thru
+        $mem = CRM_Core_DAO::singleValueQuery("
+  SELECT civicrm_membership_type.relationship_type_id
+    FROM civicrm_membership_payment
+  INNER JOIN civicrm_membership
+    ON civicrm_membership.id = civicrm_membership_payment.membership_id
+  INNER JOIN civicrm_membership_type
+    ON civicrm_membership_type.id = civicrm_membership.membership_type_id
+  WHERE civicrm_membership_payment.contribution_id = %1"
+        , [1 => [$contributionId, 'Integer']]);
+        if ($mem) {
+          $relationshipTypeId = $mem;
+        // Otherwise go with employee which is the default
+        } else {
+          $relationshipTypeIds = CRM_Core_PseudoConstant::relationshipType('name');
+          // get rel type id for employee of relation
+          foreach ($relationshipTypeIds as $id => $typeVals) {
+            if ($typeVals['name_a_b'] == 'Employee of') {
+              $relationshipTypeId = $id;
+              break;
+            }
           }
         }
 
